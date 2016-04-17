@@ -61,8 +61,8 @@ def getOrderedStationList(apiKey, lineCode, startCode, endCode):
     jsonResp = json.loads(requests.get(Constants.URL_STATION_PATH + "?FromStationCode=" + startCode + "&ToStationCode=" + endCode + "&api_key=" + apiKey).text)
 
     orderedStations = []
-    for i in jsonResp[STATION_PATH_TOP]:
-        orderedStations.append(i[STATION_PATH_CODE])
+    for i in jsonResp[Constants.STATION_PATH_TOP]:
+        orderedStations.append(i[Constants.STATION_PATH_CODE])
 
     return orderedStations
 
