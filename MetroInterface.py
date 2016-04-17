@@ -74,5 +74,6 @@ def getDistancesToGoal(apiKey, destCode):
     for i in jsonResp[Constants.STATION_STATION_TOP]:
         sourceStation = i[Constants.STATION_STATION_SOURCE]
         stationDists[sourceStation] = i[Constants.STATION_STATION_MILES]
+    stationDists[destCode] = 0
     return stationDists
 

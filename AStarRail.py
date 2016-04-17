@@ -119,7 +119,6 @@ def findShortestPath(startCode, destCode):
                 if x not in fringe and not set(x.lineList).issubset(set(availableLines))] 
         
     print("Initial fringe: " + str(fringe))
-
     for station in fringe:
         station.fn = 0 + calculateFn(currentStation, station)
         print("F(" + station.name + "): " + str(station.fn))
@@ -144,11 +143,10 @@ def findShortestPath(startCode, destCode):
         costSoFar = closestStation.fn - closestStation.distance
         print("Cost so far: " + str(costSoFar))
 
-        newNodes = []
         for line in newLines:
             print("New line to consider: " + line)
             
-            newNodes += [ x for x in [stationInfos[y] for y in lineInfos[line].stations] \
+            newNodes = [ x for x in [stationInfos[y] for y in lineInfos[line].stations] \
                     if x not in fringe and not set(x.lineList).issubset(set(availableLines))] 
 
             for station in newNodes:
