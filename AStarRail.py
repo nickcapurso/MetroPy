@@ -62,9 +62,9 @@ def buildMetroGraph(destCode):
             if station.name not in metroGraph:
                 metroGraph[station.name] = []
                 if i != len(orderedList) - 1:
-                    metroGraph[station.name].append([stationInfos[orderedList[i+1]]])
+                    metroGraph[station.name].append(stationInfos[orderedList[i+1]])
                 if i != 0:
-                    metroGraph[station.name].append([stationInfos[orderedList[i-1]]])
+                    metroGraph[station.name].append(stationInfos[orderedList[i-1]])
             else:
                 neighborsList = metroGraph[station.name]
 
@@ -111,8 +111,6 @@ def costToReachStation(startStation, endStation):
     return minDist
 
 def calculateFn(startStation, endStation):
-#    if "Gallery" in endStation.name:
-#        return 100
     fn = costToReachStation(startStation, endStation) + endStation.distance
     return fn
 
@@ -132,12 +130,12 @@ def checkShouldTakeDirectLine(queryStation, lineCode):
     else:
         return queryStation.distance > stationInfos[stationList[queryIndex-1]].distance \
                 or queryStation.distance > stationInfos[stationList[queryIndex+1]].distance
-    pass
-
 
 def findShortestPath(startCode, destCode):
     buildMetroGraph(destCode)
 
+    startStation = stationInfos[startCode]
+    destStation = stationInfos[destCode]
     currentStation = stationInfos[startCode]
     availableLines = currentStation.lineList[:]
     fringe = []
@@ -145,7 +143,7 @@ def findShortestPath(startCode, destCode):
     for line in availableLines:
         if _DEBUG: print(lineInfos[line].stations)
         fringe += [ x for x in [stationInfos[y] for y in lineInfos[line].stations] \
-                if x not in fringe and not set(x.lineList).issubset(set(availableLines))] 
+                if x not in fringe and x is not startStation and x is not destStation] 
         
     if _DEBUG: print("Initial fringe: " + str(fringe))
     for station in fringe:
@@ -155,11 +153,11 @@ def findShortestPath(startCode, destCode):
 
     # While not empty
 #    while not len(fringe):
-    for i in range(0,5):
+    for i in range(0,10):
         if _DEBUG: print("Available lines: " + str(availableLines))
 
         for line in availableLines:
-            if destCode in lineInfos[line].stations:
+            if any(code in lineInfos[line].stations for code in destStation.codeList):
                 if _DEBUG: print("On the " + line + " line")
                 if not checkShouldTakeDirectLine(currentStation, line):
                     if _DEBUG: 
@@ -182,7 +180,9 @@ def findShortestPath(startCode, destCode):
             if _DEBUG: print("New line to consider: " + line)
             
             newNodes = [ x for x in [stationInfos[y] for y in lineInfos[line].stations] \
-                    if x not in fringe and not set(x.lineList).issubset(set(availableLines))] 
+                if x not in fringe and x is not startStation and x is not destStation] 
+            #newNodes = [ x for x in [stationInfos[y] for y in lineInfos[line].stations] \
+            #        if x not in fringe and not set(x.lineList).issubset(set(availableLines))] 
 
             for station in newNodes:
                 station.fn = costSoFar + calculateFn(closestStation, station)
