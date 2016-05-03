@@ -4,10 +4,25 @@ from MetroData import Line,Station
 from time import sleep
 
 class MetroInterface:
+    """
+    Abstracts the process of hitting the API and parsing JSON responses.
+
+    For more info, see the Rail Station Information API at:
+    https://developer.wmata.com/docs/services/
+
+    Args:
+        apiKey (str): WMATA API key.
+    """
     def __init__(self, apiKey):
         self.apiKey = apiKey
 
     def getLineInfos(self):
+        """
+        Queries the Lines API for the list of Metro lines.
+
+        Returns:
+            List of MetroData.Line for each line parsed.
+        """
         jsonResp = json.loads(requests.get(Constants.URL_LINES_LIST + "?api_key=" +self.apiKey).text)
         lineInfos = {}
         for i in jsonResp[Constants.LINES_TOP]:
@@ -19,6 +34,12 @@ class MetroInterface:
         return lineInfos
 
     def getStationInfos(self):
+        """
+        Queries the Stations API for each station on the Metro.
+
+        Returns:
+            A dictionary which can be indexed by station name or code (keys) and yields MetroData.Station objects (value).
+        """
         jsonResp = json.loads(requests.get(Constants.URL_STATION_LIST + "?api_key=" +self.apiKey).text)
         stationInfos = {}
         for i in jsonResp[Constants.STATION_LIST_TOP]:
@@ -33,6 +54,7 @@ class MetroInterface:
 
             if name not in stationInfos:
                 station = Station(name, code, lc1, lc2, lc3, lc4, st1, st2)
+                # Want the station information to be indexed by name or station code
                 stationInfos[name] = station
                 stationInfos[code] = station
 
@@ -40,6 +62,7 @@ class MetroInterface:
                     if st:
                         stationInfos[st] = station
             else:
+                # Add any new lines / codes to the existing Station object
                 station = stationInfos[name]
                 for newLine in [lc1, lc2, lc3, lc4]:
                     if newLine:
@@ -53,6 +76,20 @@ class MetroInterface:
 
 
     def getLineAvgSpeed(self, lineCode, startCode, endCode):
+        """
+        Determines the approximate speed of trains on a given line, between two stations.
+
+        Querying with the absolute start and end stations of the line yields the approximate
+        speed across the whole line.
+
+        Args:
+            lineCode (str): Two-letter abbreviation for a line.
+            startCode (str): Start station code of the line.
+            endCode (str): End station code of the line.
+
+        Returns:
+            Approximate speed in MPH (float)
+        """
         jsonResp = json.loads(requests.get(Constants.URL_STATION_STATION_INFO+ "?FromStationCode=" + startCode + "&ToStationCode=" + endCode + "&api_key=" +self.apiKey).text)
        
         info = jsonResp[Constants.STATION_STATION_TOP][0]
@@ -62,6 +99,17 @@ class MetroInterface:
 
 
     def getOrderedStationList(self, lineCode, startCode, endCode):
+        """
+        Determines the stations, in order, for a given line.
+
+        Args:
+            lineCode (str): Two-letter abbreviation for a line.
+            startCode (str): Start station code of the line.
+            endCode (str): End station code of the line.
+
+        Returns:
+            List of station codes (str) sorted in order of sequence along the line.
+        """
         jsonResp = json.loads(requests.get(Constants.URL_STATION_PATH + "?FromStationCode=" + startCode + "&ToStationCode=" + endCode + "&api_key=" +self.apiKey).text)
 
         orderedStations = []
@@ -72,6 +120,15 @@ class MetroInterface:
 
 
     def getDistancesToGoal(self, destCode):
+        """
+        Queries the approximate distance (by track) of every station to the supplied destination station.
+
+        Args:
+            destCode (str): Destination station code.
+
+        Returns:
+            A dictionary of station codes to approximate distances (in miles).
+        """
         jsonResp = json.loads(requests.get(Constants.URL_STATION_STATION_INFO + "?ToStationCode=" + destCode + "&api_key=" +self.apiKey).text)
         stationDists = {}
 

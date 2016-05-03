@@ -1,3 +1,4 @@
+"""API URLs and JSON parsing keys."""
 URL_LINES_LIST = "https://api.wmata.com/Rail.svc/json/jLines"
 URL_STATION_LIST = "https://api.wmata.com/Rail.svc/json/jStations" # ?LineCode=<code>
 URL_STATION_STATION_INFO = "https://api.wmata.com/Rail.svc/json/jSrcStationToDstStationInfo" # ?ToStationCode=<code>
